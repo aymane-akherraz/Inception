@@ -13,6 +13,9 @@ if [ ! -d "/var/lib/mysql/$MYSQL_DATABASE" ]; then
         sleep 1
     done
 
+    MYSQL_PASSWORD=$(cat /run/db_password.txt)
+    MYSQL_ROOT_PASSWORD=$(cat /run/db_root_password.txt)
+
     # Execute SQL commands to configure secure users and databases
     mysql -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;"
     mysql -e "CREATE USER IF NOT EXISTS \`${MYSQL_USER}\`@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';"

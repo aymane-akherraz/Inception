@@ -4,7 +4,7 @@
 if [ ! -d "/var/lib/mysql/$MYSQL_DATABASE" ]; then
 
 
-        # Start MariaDB temporarily in the background to execute setup commands
+    # Start MariaDB temporarily in the background to execute setup commands
     mariadbd &
     pid=$!
 
@@ -13,8 +13,8 @@ if [ ! -d "/var/lib/mysql/$MYSQL_DATABASE" ]; then
         sleep 1
     done
 
-    MYSQL_PASSWORD=$(cat /run/db_password.txt)
-    MYSQL_ROOT_PASSWORD=$(cat /run/db_root_password.txt)
+    MYSQL_PASSWORD=$(cat /run/secrets/db_password.txt)
+    MYSQL_ROOT_PASSWORD=$(cat /run/secrets/db_root_password.txt)
 
     # Execute SQL commands to configure secure users and databases
     mysql -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;"

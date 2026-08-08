@@ -6,6 +6,8 @@ services:
     secrets:
       - db_password
       - db_root_password
+    env_file:
+      - .env
     volumes:
       - mariadb_data:/var/lib/mysql
     networks:
@@ -16,11 +18,10 @@ services:
     image: nginx
     restart: on-failure
     ports:
-      #- "443:443"
-      - "8443:443"
-
-    depends_on:
-      - wordpress
+      - "443:443"
+      # - "8443:443"
+    env_file:
+      - .env
     volumes:
       - wordpress_data:/var/www/html
     networks:
@@ -33,6 +34,10 @@ services:
     secrets:
       - db_password
       - credentials
+    env_file:
+      - .env
+    depends_on:
+      - mariadb
     volumes:
       - wordpress_data:/var/www/html
     networks:

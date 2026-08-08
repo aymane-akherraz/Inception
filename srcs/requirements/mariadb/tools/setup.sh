@@ -1,37 +1,57 @@
 #!/bin/bash
 
-    mkdir -p /run/mysqld
-    chown mysql:mysql /run/mysqld
+mkdir -p /run/mysqld
+chown mysql:mysql /run/mysqld
 
+MARIADB_PASSWORD=$(cat /run/secrets/db_password)
+MARIADB_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
 
-# Check if the database is already initialized to prevent overwriting data on restart
-if [ ! -d "/var/lib/mysql/$MARIADB_DATABASE" ]; then
-    # Start MariaDB temporarily in the background to execute setup commands
-    mariadbd --user=mysql&
-    pid=$!
+# Initialize MariaDB data directory if necessary
+if [ ! -d "/var/lib/mysql/mysql" ]; then
+    echo "Initializing MariaDB..."
 
-    # Wait until the temporary database process is fully awake
-    until mysqladmin ping --silent; do
-        sleep 1
-    done
-
-    MARIADB_PASSWORD=$(cat /run/secrets/db_password)
-    MARIADB_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
-
-    # Execute SQL commands to configure secure users and databases
-    mysql -e "CREATE DATABASE IF NOT EXISTS \`${MARIADB_DATABASE}\`;"
-    mysql -e "CREATE USER IF NOT EXISTS \`${MARIADB_USER}\`@'%' IDENTIFIED BY '${MARIADB_PASSWORD}';"
-    mysql -e "GRANT ALL PRIVILEGES ON \`${MARIADB_DATABASE}\`.* TO \`${MARIADB_USER}\`@'%';"
-    mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MARIADB_ROOT_PASSWORD}';"
-    mysql -e "FLUSH PRIVILEGES;"
-
-    # Safely shut down the temporary background process	
-	kill "$pid"
-	wait "$pid"
-	# chown mysql:mysql -R /var/lib/mysql/*
+    mariadb-install-db --user=mysql --datadir=/var/lib/mysql
 fi
 
-echo "MariaDB: Configuration complete! Starting database..."
+# Start MariaDB temporarily
+mariadbd --user=mysql &
+pid=$!
 
-# Run MariaDB in the foreground as the main container process
+# Wait for MariaDB
+until mysqladmin ping --silent; do
+    sleep 1
+done
+
+echo "MariaDB is ready."
+
+# Set root password
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MARIADB_ROOT_PASSWORD}';"
+
+# Create database
+mysql -u root -p"${MARIADB_ROOT_PASSWORD}" -e \
+    "CREATE DATABASE IF NOT EXISTS \`${MARIADB_DATABASE}\`;"
+
+# Create WordPress user
+mysql -u root -p"${MARIADB_ROOT_PASSWORD}" -e \
+    "CREATE USER IF NOT EXISTS '${MARIADB_USER}'@'%' IDENTIFIED BY '${MARIADB_PASSWORD}';"
+
+# Make sure password is correct even if user already exists
+mysql -u root -p"${MARIADB_ROOT_PASSWORD}" -e \
+    "ALTER USER '${MARIADB_USER}'@'%' IDENTIFIED BY '${MARIADB_PASSWORD}';"
+
+# Grant access
+mysql -u root -p"${MARIADB_ROOT_PASSWORD}" -e \
+    "GRANT ALL PRIVILEGES ON \`${MARIADB_DATABASE}\`.* TO '${MARIADB_USER}'@'%';"
+
+mysql -u root -p"${MARIADB_ROOT_PASSWORD}" -e \
+    "FLUSH PRIVILEGES;"
+
+echo "MariaDB: Configuration complete."
+
+# Stop temporary server
+mysqladmin -u root -p"${MARIADB_ROOT_PASSWORD}" shutdown
+
+wait "$pid"
+
+# Start MariaDB as the main container process
 exec mariadbd --user=mysql

@@ -1,41 +1,47 @@
 services:
-	mariadb:
-		build: requirements/mariadb/
-		image: mariadb
+  mariadb:
+    build: requirements/mariadb/
+    image: mariadb
     restart: on-failure
-		secrets:
+    secrets:
       - db_password
       - db_root_password
-		volumes:
+    volumes:
       - mariadb_data:/var/lib/mysql
-		networks:
-			- my_net
+    networks:
+      - my_net
 
-	nginx:
-		build: requirements/nginx
-		image: nginx
+  nginx:
+    build: requirements/nginx
+    image: nginx
     restart: on-failure
     ports:
-      - "443:443"
-		networks:
-			- my_net
+      #- "443:443"
+      - "8443:443"
 
-	wordpress:
-		build: requirements/wordpress/
-		image: wordpress
+    depends_on:
+      - wordpress
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - my_net
+
+  wordpress:
+    build: requirements/wordpress/
+    image: wordpress
     restart: on-failure
-		secrets:
+    secrets:
       - db_password
       - credentials
-		volumes:
+    volumes:
       - wordpress_data:/var/www/html
-		networks:
-			- my_net
+    networks:
+      - my_net
 
 networks:
-	my_net:
+  my_net:
     name: my_net
-		driver: bridge
+    driver: bridge
 
 volumes:
   mariadb_data:
@@ -43,19 +49,19 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/aakehrra/data/mariadb
+      device: /home/aakherra/data/mariadb
 
   wordpress_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/aakehrra/data/wordpress
+      device: /home/aakherra/data/wordpress
 
 secrets:
   db_root_password:
     file: ../secrets/db_root_password.txt
   db_password:
     file: ../secrets/db_password.txt
-	credentials:
-		file: ../secrets/credentials.txt
+  credentials:
+    file: ../secrets/credentials.txt

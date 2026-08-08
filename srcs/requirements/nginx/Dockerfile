@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 
-COPY conf/nginx.conf /etc/nginx/sites-available/default
+COPY conf/config.conf /etc/nginx/sites-available/default
 
 COPY tools/setup.sh /setup.sh
 RUN chmod +x /setup.sh

@@ -4,8 +4,8 @@ mkdir -p /var/www/html
 
 cd /var/www/html
 
-MYSQL_PASSWORD=$(cat /run/secrets/db_password.txt)
-SECRET_FILE="/run/secrets/credentials.txt"
+MARIADB_PASSWORD=$(cat /run/secrets/db_password)
+SECRET_FILE="/run/secrets/credentials"
 WP_ADMIN=$(grep "^WP_ADMIN=" "$SECRET_FILE" | cut -d'=' -f2)
 WP_ADMIN_PASSWORD=$(grep "^WP_ADMIN_PASSWORD=" "$SECRET_FILE" | cut -d'=' -f2)
 WP_ADMIN_EMAIL=$(grep "^WP_ADMIN_EMAIL=" "$SECRET_FILE" | cut -d'=' -f2)
@@ -15,7 +15,7 @@ WP_USER_EMAIL=$(grep "^WP_USER_EMAIL=" "$SECRET_FILE" | cut -d'=' -f2)
 
 
 # Wait for MariaDB
-until mysqladmin ping -h"$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" --silent
+until mysqladmin ping -h"$MARIADB_HOST" -u"$MARIADB_USER" -p"$MARIADB_PASSWORD" --silent
 do
     sleep 2
 done
@@ -25,10 +25,10 @@ if [ ! -f wp-config.php ]; then
     wp core download --allow-root
 
     wp config create \
-        --dbname=$MYSQL_DATABASE \
-        --dbuser=$MYSQL_USER \
-        --dbpass=$MYSQL_PASSWORD \
-        --dbhost=$MYSQL_HOST \
+        --dbname=$MARIADB_DATABASE \
+        --dbuser=$MARIADB_USER \
+        --dbpass=$MARIADB_PASSWORD \
+        --dbhost=$MARIADB_HOST \
         --allow-root
 
     wp core install \

@@ -6,11 +6,12 @@ chown mysql:mysql /run/mysqld
 MARIADB_PASSWORD=$(cat /run/secrets/db_password)
 MARIADB_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
 
+chown -R mysql:mysql /var/lib/mysql
+
 # Initialize MariaDB data directory if necessary
 if [ ! -d "/var/lib/mysql/mysql" ]; then
     echo "Initializing MariaDB..."
-
-    mariadb-install-db --user=mysql --datadir=/var/lib/mysql
+    mariadb-install-db --user=mysql
 fi
 
 # Start MariaDB temporarily
@@ -24,27 +25,19 @@ done
 
 echo "MariaDB is ready."
 
-# Set root password
-mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MARIADB_ROOT_PASSWORD}';"
+MYSQL="mysql -u root -p${MARIADB_ROOT_PASSWORD}"
 
-# Create database
-mysql -u root -p"${MARIADB_ROOT_PASSWORD}" -e \
-    "CREATE DATABASE IF NOT EXISTS \`${MARIADB_DATABASE}\`;"
+$MYSQL -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MARIADB_ROOT_PASSWORD}';"
 
-# Create WordPress user
-mysql -u root -p"${MARIADB_ROOT_PASSWORD}" -e \
-    "CREATE USER IF NOT EXISTS '${MARIADB_USER}'@'%' IDENTIFIED BY '${MARIADB_PASSWORD}';"
+$MYSQL -e "CREATE DATABASE IF NOT EXISTS \`${MARIADB_DATABASE}\`;"
 
-# Make sure password is correct even if user already exists
-mysql -u root -p"${MARIADB_ROOT_PASSWORD}" -e \
-    "ALTER USER '${MARIADB_USER}'@'%' IDENTIFIED BY '${MARIADB_PASSWORD}';"
+$MYSQL -e "CREATE USER IF NOT EXISTS '${MARIADB_USER}'@'%' IDENTIFIED BY '${MARIADB_PASSWORD}';"
 
-# Grant access
-mysql -u root -p"${MARIADB_ROOT_PASSWORD}" -e \
-    "GRANT ALL PRIVILEGES ON \`${MARIADB_DATABASE}\`.* TO '${MARIADB_USER}'@'%';"
+$MYSQL -e "ALTER USER '${MARIADB_USER}'@'%' IDENTIFIED BY '${MARIADB_PASSWORD}';"
 
-mysql -u root -p"${MARIADB_ROOT_PASSWORD}" -e \
-    "FLUSH PRIVILEGES;"
+$MYSQL -e "GRANT ALL PRIVILEGES ON \`${MARIADB_DATABASE}\`.* TO '${MARIADB_USER}'@'%';"
+
+$MYSQL -e "FLUSH PRIVILEGES;"
 
 echo "MariaDB: Configuration complete."
 

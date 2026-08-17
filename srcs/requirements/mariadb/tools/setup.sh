@@ -19,7 +19,7 @@ mariadbd --user=mysql &
 pid=$!
 
 # Wait for MariaDB
-until mysqladmin ping --silent; do
+until [ -S /run/mysqld/mysqld.sock ]; do
     sleep 1
 done
 

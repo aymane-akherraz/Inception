@@ -1,8 +1,7 @@
 #!/bin/bash
 
 mkdir -p /var/www/html
-
-cd /var/www/html
+chown -R www-data:www-data /var/www/html
 
 MARIADB_PASSWORD=$(cat /run/secrets/db_password)
 SECRET_FILE="/run/secrets/credentials"
@@ -13,45 +12,39 @@ WP_USER=$(grep "^WP_USER=" "$SECRET_FILE" | cut -d'=' -f2)
 WP_USER_PASSWORD=$(grep "^WP_USER_PASSWORD=" "$SECRET_FILE" | cut -d'=' -f2)
 WP_USER_EMAIL=$(grep "^WP_USER_EMAIL=" "$SECRET_FILE" | cut -d'=' -f2)
 
-
-# Wait for MariaDB
-# until mysqladmin ping -h"$MARIADB_HOST" -u"$MARIADB_USER" -p"$MARIADB_PASSWORD" --silent
-# do
-#     sleep 2
-# done
-
-until (echo > /dev/tcp/$MARIADB_HOST/3306) >/dev/null 2>&1; do
+until mysqladmin ping -h "$MARIADB_HOST" -u"$MARIADB_USER" -p"$MARIADB_PASSWORD" --silent >/dev/null 2>&1; do
     sleep 2
 done
 
+su -s /bin/bash www-data -c "
+cd /var/www/html
+
 if [ ! -f wp-config.php ]; then
-    wp core download --allow-root
+    wp core download
 
     wp config create \
-        --dbname="$MARIADB_DATABASE" \
-        --dbuser="$MARIADB_USER" \
-        --dbpass="$MARIADB_PASSWORD" \
-        --dbhost="$MARIADB_HOST" \
-        --allow-root
+        --dbname=\"$MARIADB_DATABASE\" \
+        --dbuser=\"$MARIADB_USER\" \
+        --dbpass=\"$MARIADB_PASSWORD\" \
+        --dbhost=\"$MARIADB_HOST\"
 fi
 
-if ! wp core is-installed --allow-root --url="$DOMAIN_NAME"; then
+if ! wp core is-installed --url=\"$DOMAIN_NAME\"; then
     wp core install \
-        --url="$DOMAIN_NAME" \
-        --title="$WP_TITLE" \
-        --admin_user="$WP_ADMIN" \
-        --admin_password="$WP_ADMIN_PASSWORD" \
-        --admin_email="$WP_ADMIN_EMAIL" \
-        --allow-root
+        --url=\"$DOMAIN_NAME\" \
+        --title=\"$WP_TITLE\" \
+        --admin_user=\"$WP_ADMIN\" \
+        --admin_password=\"$WP_ADMIN_PASSWORD\" \
+        --admin_email=\"$WP_ADMIN_EMAIL\"
 fi
 
-if ! wp user get "$WP_USER" --allow-root >/dev/null 2>&1; then
+if ! wp user get \"$WP_USER\" >/dev/null 2>&1; then
     wp user create \
-        "$WP_USER" \
-        "$WP_USER_EMAIL" \
-        --user_pass="$WP_USER_PASSWORD" \
-        --allow-root
+        \"$WP_USER\" \
+        \"$WP_USER_EMAIL\" \
+        --user_pass=\"$WP_USER_PASSWORD\"
 fi
+"
 
 mkdir -p /run/php
 

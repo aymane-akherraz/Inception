@@ -43,6 +43,37 @@ services:
     networks:
       - my_net
 
+  redis:
+    build: requirements/bonus/redis
+    image: redis
+    restart: on-failure
+    networks:
+      - my_net
+
+  vsftp:
+    build: requirements/bonus/vsftp
+    image: vsftp
+    restart: on-failure
+    secrets:
+      - credentials
+    env_file:
+      - .env
+    ports:
+     - "21:21"
+     - "30000-30009:30000-30009"
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - my_net
+
+  adminer:
+    build: requirements/bonus/adminer
+    image: adminer
+    restart: on-failure
+    networks:
+      - my_net
+
+ 
 networks:
   my_net:
     name: my_net
@@ -54,14 +85,14 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/aakherra/data/mariadb
+      device: /home/user/data/mariadb
 
   wordpress_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/aakherra/data/wordpress
+      device: /home/user/data/wordpress
 
 secrets:
   db_root_password:

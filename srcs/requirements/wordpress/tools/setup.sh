@@ -36,6 +36,15 @@ if ! wp core is-installed --url=\"$DOMAIN_NAME\"; then
         --admin_user=\"$WP_ADMIN\" \
         --admin_password=\"$WP_ADMIN_PASSWORD\" \
         --admin_email=\"$WP_ADMIN_EMAIL\"
+
+fi
+
+if ! wp plugin is-installed redis-cache; then
+    wp config set WP_REDIS_HOST redis
+    wp config set WP_REDIS_PORT 6379 --raw
+
+    wp plugin install redis-cache --activate
+    wp redis enable
 fi
 
 if ! wp user get \"$WP_USER\" >/dev/null 2>&1; then

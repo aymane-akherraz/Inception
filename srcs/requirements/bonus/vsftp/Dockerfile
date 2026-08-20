@@ -1,14 +1,14 @@
 FROM debian:bookworm
 
 RUN apt update && \
-    apt install -y mariadb-server && \
+    apt install vsftpd -y && \
     rm -rf /var/lib/apt/lists/*
 
-COPY conf/mariadb.conf  /etc/mysql/mariadb.conf.d/50-server.cnf
-
+COPY conf/vsftp.conf /etc/vsftpd.conf
 COPY tools/setup.sh /setup.sh
+
 RUN chmod +x /setup.sh
 
-EXPOSE 3306
+EXPOSE 21
 
 ENTRYPOINT ["/setup.sh"]

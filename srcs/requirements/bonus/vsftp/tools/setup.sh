@@ -9,6 +9,9 @@ if ! id "$FTP_USER" >/dev/null 2>&1; then
     echo "$FTP_USER:$FTP_PASSWORD" | chpasswd
 fi
 
+usermod -g www-data "$FTP_USER"
+chmod -R g+rwX /var/www/html
+
 mkdir -p /var/run/vsftpd/empty
 
 exec vsftpd /etc/vsftpd.conf

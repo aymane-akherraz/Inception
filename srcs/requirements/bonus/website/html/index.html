@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inception Infrastructure</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>Inception</h1>
+        <p>Docker Infrastructure Showcase</p>
+    </header>
+
+    <main>
+
+        <section class="intro">
+            <h2>My Infrastructure</h2>
+            <p>
+                This project is built using Docker containers,
+                with each service running independently.
+            </p>
+        </section>
+
+        <section class="services">
+
+            <button class="service-card" data-service="nginx">
+                <span class="icon">&#x1F310;</span>
+                <h3>Nginx</h3>
+                <p>Web server &amp; reverse proxy</p>
+            </button>
+
+            <button class="service-card" data-service="wordpress">
+                <span class="icon">&#x1F4DD;</span>
+                <h3>WordPress</h3>
+                <p>Content management system</p>
+            </button>
+
+            <button class="service-card" data-service="mariadb">
+                <span class="icon">&#x1F5C4;</span>
+                <h3>MariaDB</h3>
+                <p>Database server</p>
+            </button>
+
+            <button class="service-card" data-service="redis">
+                <span class="icon">&#x26A1;</span>
+                <h3>Redis</h3>
+                <p>WordPress object cache</p>
+            </button>
+
+            <button class="service-card" data-service="adminer">
+                <span class="icon">&#x1F527;</span>
+                <h3>Adminer</h3>
+                <p>Database management</p>
+            </button>
+
+            <button class="service-card" data-service="ftp">
+                <span class="icon">&#x1F4C1;</span>
+                <h3>FTP</h3>
+                <p>File transfer service</p>
+            </button>
+
+            <button class="service-card" data-service="onlogs">
+                <span class="icon">&#x1F4CA;</span>
+                <h3>OnLogs</h3>
+                <p>Container log viewer</p>
+            </button>
+
+        </section>
+
+        <section class="description">
+            <h2 id="service-title">Select a service</h2>
+
+            <p id="service-description">
+                Click on one of the services above to learn more about it.
+            </p>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>42 Inception &bull; Docker Infrastructure</p>
+    </footer>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

@@ -86,11 +86,16 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      # - onlogs_data:/leveldb
-
     networks:
       - my_net
- 
+
+  website:
+    build: requirements/bonus/website
+    image: website
+    restart: on-failure
+    networks:
+        - my_net
+
 networks:
   my_net:
     name: my_net

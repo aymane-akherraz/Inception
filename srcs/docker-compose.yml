@@ -19,7 +19,6 @@ services:
     restart: on-failure
     ports:
       - "443:443"
-      # - "8443:443"
     env_file:
       - .env
     depends_on:
@@ -107,14 +106,14 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/user/data/mariadb
+      device: /home/aakherra/data/mariadb
 
   wordpress_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/user/data/wordpress
+      device: /home/aakherra/data/wordpress
 
 secrets:
   db_root_password:

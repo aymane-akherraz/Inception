@@ -2,6 +2,8 @@
 
 mkdir -p /var/www/html
 chown -R www-data:www-data /var/www/html
+mkdir -p /var/www/.wp-cli/cache
+chown -R www-data:www-data /var/www/.wp-cli
 
 MARIADB_PASSWORD=$(cat /run/secrets/db_password)
 SECRET_FILE="/run/secrets/credentials"

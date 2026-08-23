@@ -1,12 +1,17 @@
 COMPOSE		= docker compose -f srcs/docker-compose.yml
+DATA_DIR    = /home/aakherra/data
 
 all:
+	mkdir -p $(DATA_DIR)/mariadb
+	mkdir -p $(DATA_DIR)/wordpress
 	$(COMPOSE) up -d --build
 
 build:
 	$(COMPOSE) build
 
 up:
+	mkdir -p $(DATA_DIR)/mariadb
+	mkdir -p $(DATA_DIR)/wordpress
 	$(COMPOSE) up -d
 
 down:

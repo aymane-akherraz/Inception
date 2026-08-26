@@ -7,11 +7,9 @@ RUN apt-get update && \
         git && \
     rm -rf /var/lib/apt/lists/*
 
-# Node.js 22
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y nodejs
 
-# Go
 RUN curl -fsSL https://go.dev/dl/go1.26.5.linux-amd64.tar.gz -o /tmp/go.tar.gz && \
     rm -rf /usr/local/go && \
     tar -C /usr/local -xzf /tmp/go.tar.gz && \
@@ -23,16 +21,13 @@ WORKDIR /opt
 
 RUN git clone https://github.com/devforth/OnLogs.git
 
-# Build frontend
 WORKDIR /opt/OnLogs/application/frontend
 
 RUN npm install && \
     npm run build
 
-# Put frontend where the backend expects it
 RUN cp -r dist /opt/OnLogs/application/backend/dist
 
-# Build backend
 WORKDIR /opt/OnLogs/application/backend
 
 RUN go build -o /usr/local/bin/onlogs .
